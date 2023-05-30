@@ -68,6 +68,33 @@ def jaguar_prediction():
     else:
         #return a error if a request has a  method different of "POST"
         return jsonify({"error": "The HTTP protocol only allows Post methods"})
+    
+
+@app.route('/models/objectD', methods = ["GET","POST"])
+def object_prediction():
+    if request.method=="POST":
+        #request the json data
+        img_data=json.loads(request.data)
+        #Error checking if there exist a file and if the filename is an empty string
+        if img_data is None or img_data["filename"]=="":
+            #if not exist a file the it will return an error
+            return jsonify({"error": "Empty-data"})
+        else:
+            if allowed_file(img_data["filename"]):
+                #joint the filename with the IMG_DIR
+                file_path = os.path.join(IMG_DIR, img_data["filename"])
+                #call the fucntion to run the inference with onnxruntime
+                output=run_inference(file_path, 2.1)
+                #print(jsonfile)
+                return jsonify({"filename": img_data["filename"],
+                                "outputs":output})
+            else:
+                #return error to show that the file are not allowed
+                return jsonify({"error": "The chossen file is not allowed"})               
+
+    else:
+        #return a error if a request has a  method different of "POST"
+        return jsonify({"error": "The HTTP protocol only allows Post methods"})
 
     return "Inference API"
 if __name__ == '__main__':
